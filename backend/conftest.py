@@ -1,9 +1,7 @@
 """Configure pydub to use the imageio-ffmpeg bundled binary when ffmpeg is not on PATH."""
-import io
 import os
 import re
 import subprocess
-import sys
 import tempfile
 
 import pydub
