@@ -50,7 +50,7 @@ User (browser)
   └─ GET /health            →  FastAPI  →  200 OK
 ```
 
-No database. Lessons are stateless — word list in, MP3 out. API keys are stored in a `.env` file and never leave the local machine.
+No hosted database. Generated lesson scripts are persisted in browser `localStorage` so they can be revisited. API keys are stored in a `.env` file and never leave the local machine.
 
 ---
 
@@ -139,23 +139,51 @@ ffmpeg must be installed locally for pydub to export MP3 files.
 
 ## Frontend
 
-Single-page React app (Vite). Three sequential panels:
+Single-page React app (Vite). A saved lessons list sits above the main flow; below it, three sequential panels appear as the user progresses.
+
+### Saved Lessons List
+- Displayed at the top of the page, always visible
+- Lists all lessons saved in `localStorage`, showing title and creation date
+- Clicking a lesson loads its title and script directly into the Script Editor (Panel 2), bypassing Panel 1
+- Each entry has a delete button to remove it from storage
+- Hidden when no lessons are saved yet
 
 ### Panel 1 — Input
-- Text field: lesson topic (e.g. "directions at a train station")
-- Text area: words/phrases, one per line
+- Text field: lesson title (e.g. "Directions — Train Station") — used to identify the lesson in the saved list
+- Text field: lesson topic passed to Claude (e.g. "asking for directions at a train station")
+- Text area: words/phrases to focus on, one per line
 - "Generate Script" button — calls `/generate-script`, shows loading spinner
 
 ### Panel 2 — Script Editor
-- Appears after script is returned
-- Editable `<textarea>` pre-filled with the generated script
+- Appears after script is returned (or when a saved lesson is loaded)
+- Editable `<textarea>` pre-filled with the generated/saved script
+- Script is auto-saved to `localStorage` under the lesson title whenever it changes
 - "Generate Audio" button — sends edited script to `/generate-audio`
 
 ### Panel 3 — Audio Player
 - Appears once MP3 is ready
 - HTML5 `<audio>` element with play/pause/seek
 - "Download MP3" button
-- "Start Over" button to reset
+- "Start Over" button to reset to Panel 1
+
+### localStorage Schema
+
+Lessons are stored under the key `tutor-me-lessons` as a JSON array:
+
+```json
+[
+  {
+    "id": "uuid",
+    "title": "Directions — Train Station",
+    "topic": "asking for directions at a train station",
+    "wordList": ["左 (zuǒ)", "右 (yòu)", "直走"],
+    "script": "[EN] In this lesson...",
+    "createdAt": "2026-05-01T10:00:00Z"
+  }
+]
+```
+
+A new entry is created when the script is first generated. The `script` field is updated as the user edits.
 
 ### Styling
 Plain CSS — clean, minimal, readable. No UI component library. Function over form for a local tool.
@@ -201,7 +229,7 @@ GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account.json
 
 ## Out of Scope (for now)
 
-- User accounts or saved lessons
+- User accounts or hosted lesson storage (localStorage only for now)
 - Vocabulary database or spaced repetition scheduling
 - Mobile app
 - Any on-screen display during lesson playback
