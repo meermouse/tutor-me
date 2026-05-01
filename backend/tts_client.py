@@ -17,6 +17,16 @@ _MP3_SLOW_CONFIG = texttospeech.AudioConfig(
     speaking_rate=0.7,
 )
 
+_client: texttospeech.TextToSpeechClient | None = None
+
+
+def _get_client() -> texttospeech.TextToSpeechClient:
+    global _client
+    if _client is None:
+        # Instantiated lazily so import succeeds in credential-free environments.
+        _client = texttospeech.TextToSpeechClient()
+    return _client
+
 
 def synthesize(text: str, lang: str, slow: bool) -> bytes:
     """Call Google Cloud TTS and return MP3 bytes.
@@ -24,7 +34,7 @@ def synthesize(text: str, lang: str, slow: bool) -> bytes:
     lang: "en" for English, "zh" for Mandarin.
     slow: only applies when lang == "zh".
     """
-    client = texttospeech.TextToSpeechClient()
+    client = _get_client()
     synthesis_input = texttospeech.SynthesisInput(text=text)
     voice = _EN_VOICE if lang == "en" else _ZH_VOICE
     audio_config = _MP3_SLOW_CONFIG if (lang == "zh" and slow) else _MP3_CONFIG

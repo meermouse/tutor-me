@@ -39,4 +39,9 @@ def generate_script_text(topic: str, word_list: list[str]) -> str:
         system=_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_message}],
     )
+    if message.stop_reason == "max_tokens":
+        raise RuntimeError(
+            "Script was truncated (max_tokens reached). "
+            "Reduce the word list or increase max_tokens."
+        )
     return message.content[0].text
