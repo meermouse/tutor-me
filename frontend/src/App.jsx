@@ -26,18 +26,21 @@ export default function App() {
   }
 
   function handleScriptChange(updatedScript) {
+    if (!currentLesson) return
     const updated = { ...currentLesson, script: updatedScript }
     setCurrentLesson(updated)
     saveLesson(updated)
   }
 
   function handleAudioGenerated(url) {
+    if (!url) return
     if (audioUrl) URL.revokeObjectURL(audioUrl)
     setAudioUrl(url)
     setPanel('player')
   }
 
   function handleLoadLesson(lesson) {
+    if (audioUrl) URL.revokeObjectURL(audioUrl)
     setCurrentLesson(lesson)
     setAudioUrl(null)
     setPanel('editor')
