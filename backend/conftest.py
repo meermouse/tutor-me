@@ -1,6 +1,7 @@
 """Configure pydub to use the imageio-ffmpeg bundled binary when ffmpeg is not on PATH."""
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 
@@ -14,19 +15,8 @@ except (ImportError, RuntimeError):
     _ffmpeg_exe = None
 
 
-def _find_exe(name):
-    try:
-        result = subprocess.run(
-            ["where", name], capture_output=True, text=True, check=True
-        )
-        path = result.stdout.strip().splitlines()[0]
-        return path if path else None
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
-
-
-_ffmpeg = _ffmpeg_exe or _find_exe("ffmpeg")
-_ffprobe = _find_exe("ffprobe") or _ffmpeg
+_ffmpeg = _ffmpeg_exe or shutil.which("ffmpeg")
+_ffprobe = shutil.which("ffprobe") or _ffmpeg
 
 if _ffmpeg:
     pydub.AudioSegment.converter = _ffmpeg

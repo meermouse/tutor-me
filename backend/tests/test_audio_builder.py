@@ -23,6 +23,12 @@ def test_build_audio_returns_bytes():
     assert len(result) > 0
 
 
+def test_build_audio_empty_segments_returns_bytes():
+    result = build_audio([], _mock_tts)
+    assert isinstance(result, bytes)
+    assert len(result) > 0
+
+
 def test_build_audio_handles_pause():
     segments = [PauseSegment(duration=1.0)]
     result = build_audio(segments, _mock_tts)
