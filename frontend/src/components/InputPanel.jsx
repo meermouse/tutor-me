@@ -17,7 +17,7 @@ export default function InputPanel({ onScriptGenerated }) {
       const { script } = await generateScript(title.trim(), topic.trim(), wordList)
       onScriptGenerated({ title: title.trim(), topic: topic.trim(), wordList, script })
     } catch (err) {
-      setError(err.message)
+      setError(err?.message ?? 'An unexpected error occurred.')
     } finally {
       setLoading(false)
     }
