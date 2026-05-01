@@ -1,8 +1,7 @@
 from __future__ import annotations
 import io
-import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -25,7 +24,7 @@ app.add_middleware(
 
 
 class ScriptRequest(BaseModel):
-    title: str
+    title: str  # client-side metadata; stored in localStorage, not forwarded to Claude
     topic: str
     word_list: list[str]
 
@@ -48,6 +47,8 @@ def generate_script_endpoint(request: ScriptRequest):
 @app.post("/generate-audio")
 def generate_audio_endpoint(request: AudioRequest):
     segments = parse_script(request.script)
+    if not segments:
+        raise HTTPException(status_code=422, detail="Script produced no parseable segments.")
     audio_bytes = build_audio(segments, synthesize)
     return StreamingResponse(
         io.BytesIO(audio_bytes),

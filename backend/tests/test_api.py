@@ -43,6 +43,11 @@ def test_generate_audio_returns_mp3(client):
     assert len(response.content) > 0
 
 
+def test_generate_audio_rejects_empty_script(client):
+    response = client.post("/generate-audio", json={"script": "no markers here"})
+    assert response.status_code == 422
+
+
 def test_generate_script_requires_word_list(client):
     response = client.post(
         "/generate-script",
