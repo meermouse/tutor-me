@@ -10,12 +10,28 @@ import pydub.utils
 try:
     import imageio_ffmpeg
     _ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
-except ImportError:
+except (ImportError, RuntimeError):
     _ffmpeg_exe = None
 
-# Point pydub's converter (used for encode/decode) at our bundled ffmpeg.
-if _ffmpeg_exe:
-    pydub.AudioSegment.converter = _ffmpeg_exe
+
+def _find_exe(name):
+    try:
+        result = subprocess.run(
+            ["where", name], capture_output=True, text=True, check=True
+        )
+        path = result.stdout.strip().splitlines()[0]
+        return path if path else None
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
+_ffmpeg = _ffmpeg_exe or _find_exe("ffmpeg")
+_ffprobe = _find_exe("ffprobe") or _ffmpeg
+
+if _ffmpeg:
+    pydub.AudioSegment.converter = _ffmpeg
+if _ffprobe:
+    pydub.AudioSegment.ffprobe = _ffprobe
 
 
 def _mediainfo_json_via_ffmpeg(filepath, read_ahead_limit=-1):
@@ -27,7 +43,7 @@ def _mediainfo_json_via_ffmpeg(filepath, read_ahead_limit=-1):
     Returns a dict shaped like the JSON that ffprobe -of json -show_streams
     -show_format would produce — just enough for pydub's from_file() to work.
     """
-    ffmpeg = _ffmpeg_exe or "ffmpeg"
+    ffmpeg = _ffmpeg or "ffmpeg"
 
     # filepath may be a BytesIO / file-like object – write to a temp file so
     # ffmpeg can read it.
@@ -76,7 +92,6 @@ def _mediainfo_json_via_ffmpeg(filepath, read_ahead_limit=-1):
             if sample_fmt == "fltp" and codec_name in ("mp3", "mp4", "aac", "webm", "ogg"):
                 bits_per_sample = 16
             else:
-                # map common sample formats
                 bits_map = {
                     "u8": 8, "s16": 16, "s16le": 16, "s32": 32, "s32le": 32,
                     "flt": 32, "dbl": 64,
@@ -106,9 +121,7 @@ def _mediainfo_json_via_ffmpeg(filepath, read_ahead_limit=-1):
 
 # Monkey-patch pydub so both the module-level function and any already-imported
 # references inside audio_segment.py see the replacement.
-if _ffmpeg_exe:
+if _ffmpeg:
     pydub.utils.mediainfo_json = _mediainfo_json_via_ffmpeg
-    # audio_segment imports mediainfo_json directly at the top of the file, so
-    # we must also patch it there.
     import pydub.audio_segment as _pydub_as
     _pydub_as.mediainfo_json = _mediainfo_json_via_ffmpeg
