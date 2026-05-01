@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 import { generateAudio } from '../api.js'
 
 export default function ScriptEditor({ lesson, onScriptChange, onAudioGenerated }) {
-  const [script, setScript] = useState(lesson.script)
+  const [script, setScript] = useState(lesson.script ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    setScript(lesson.script)
+    setScript(lesson.script ?? '')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id])
 
   function handleScriptChange(e) {
