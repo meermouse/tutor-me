@@ -32,11 +32,17 @@ def parse_script(script: str) -> list[Segment]:
         if not line:
             continue
         if line.startswith('[EN] '):
-            segments.append(EnglishSegment(text=line[5:]))
+            text = line[5:].strip()
+            if text:
+                segments.append(EnglishSegment(text=text))
         elif line.startswith('[ZH SLOW] '):
-            segments.append(MandarinSegment(text=line[10:], slow=True))
+            text = line[10:].strip()
+            if text:
+                segments.append(MandarinSegment(text=text, slow=True))
         elif line.startswith('[ZH] '):
-            segments.append(MandarinSegment(text=line[5:], slow=False))
+            text = line[5:].strip()
+            if text:
+                segments.append(MandarinSegment(text=text, slow=False))
         elif m := _PAUSE_RE.match(line):
             segments.append(PauseSegment(duration=float(m.group(1))))
     return segments

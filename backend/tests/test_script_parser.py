@@ -1,4 +1,3 @@
-import pytest
 from script_parser import parse_script, EnglishSegment, MandarinSegment, PauseSegment
 
 
@@ -30,6 +29,13 @@ def test_parses_pause_line():
     assert len(segments) == 1
     assert isinstance(segments[0], PauseSegment)
     assert segments[0].duration == 4.0
+
+
+def test_parses_pause_with_decimal_duration():
+    segments = parse_script("[PAUSE 1.5s]")
+    assert len(segments) == 1
+    assert isinstance(segments[0], PauseSegment)
+    assert segments[0].duration == 1.5
 
 
 def test_parses_multi_line_script():
