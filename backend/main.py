@@ -1,5 +1,6 @@
 from __future__ import annotations
 import io
+import ffmpeg_setup  # noqa: F401 — configures pydub to use bundled ffmpeg
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
