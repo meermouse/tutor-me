@@ -1,5 +1,5 @@
 export default function SavedLessonsList({ lessons, onLoad, onDelete }) {
-  if (lessons.length === 0) return null
+  if (!lessons || lessons.length === 0) return null
 
   return (
     <div className="saved-lessons">
