@@ -3,7 +3,9 @@ export default function AudioPlayer({ audioUrl, lessonTitle, onStartOver }) {
     const a = document.createElement('a')
     a.href = audioUrl
     a.download = `${lessonTitle.replace(/\s+/g, '-').toLowerCase()}.mp3`
+    document.body.appendChild(a)
     a.click()
+    document.body.removeChild(a)
   }
 
   return (
