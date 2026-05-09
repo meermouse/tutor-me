@@ -1,82 +1,90 @@
-# Project Name
+# Tutor Me — Mandarin Audio Lesson Generator
 
-A brief description of what this project does and who it's for.
-Testing123
+A local web app that generates personalised Pimsleur-style Mandarin listening lessons. Provide a topic and a word list, Claude generates a lesson script, you review it, and the app produces a single MP3 with English instructions, Mandarin speech, slow repetitions, and timed pauses.
 
-## Table of Contents
+## Prerequisites
 
-- [Features](#features)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
+- Python 3.11+
+- Node.js 18+
+- An [Anthropic API key](https://console.anthropic.com)
+- A Google Cloud project with the [Cloud Text-to-Speech API](https://console.cloud.google.com/apis/library/texttospeech.googleapis.com) enabled, and a service account JSON key file
 
-## Features
+## Installation
 
-- Feature one
-- Feature two
-- Feature three
-
-## Getting Started
-
-### Prerequisites
-
-List any software, tools, or accounts required before installation.
-
-```
-example: Node.js >= 18.0.0
-```
-
-### Installation
-
-1. Clone the repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/meermouse/tutor-me.git
 cd tutor-me
 ```
 
-2. Install dependencies
+### 2. Set up the backend
 
-```bash
+```powershell
+cd backend
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt -r requirements-dev.txt
+```
+
+Copy the example environment file and fill in your credentials:
+
+```powershell
+copy .env.example .env
+```
+
+Edit `backend\.env`:
+
+```
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+GOOGLE_APPLICATION_CREDENTIALS=C:\path\to\your\service-account.json
+```
+
+### 3. Set up the frontend
+
+```powershell
+cd frontend
 npm install
 ```
 
-3. Copy the example environment file and configure it
+## Starting the app
 
-```bash
-cp .env.example .env
+Open two terminals.
+
+**Terminal 1 — Backend** (runs on port 8000):
+
+```powershell
+cd backend
+.\start.ps1
 ```
+
+**Terminal 2 — Frontend** (runs on port 5173):
+
+```powershell
+cd frontend
+npm run dev
+```
+
+Then open `http://localhost:5173` in your browser.
 
 ## Usage
 
-Describe how to run and use the project.
-
-```bash
-npm start
-```
-
-Add screenshots or code examples here as needed.
+1. Enter a lesson title, topic, and a list of words/phrases (one per line)
+2. Click **Generate Script** — Claude writes a structured lesson script
+3. Review and edit the script if needed
+4. Click **Generate Audio** — the app calls Google Cloud TTS and stitches an MP3
+5. Play the lesson directly in the browser or click **Download MP3**
+6. Previously generated lessons are saved automatically and listed at the top of the page
 
 ## Configuration
 
-Describe any environment variables or configuration options.
+| Variable | Description |
+|----------|-------------|
+| `ANTHROPIC_API_KEY` | Anthropic API key for script generation |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Path to Google Cloud service account JSON |
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT`   | Server port | `3000`  |
+## Running tests
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m 'Add my feature'`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a pull request
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+```powershell
+cd backend
+.venv\Scripts\pytest
+```
